@@ -130,7 +130,6 @@ st.caption(f"As of {latest_date.strftime('%B %Y')}")
 latest = filtered[filtered["date"] == latest_date].sort_values("City")
 bar_fig = px.bar(
     latest,
-    x="City",
     y=metric,
     color="City",
     color_discrete_map=CITY_COLORS,

@@ -102,7 +102,7 @@ for col, city in zip(cols, sorted(cities)):
     col.metric(
         city,
         f"{latest_value:,.1f}{value_suffix}",
-        f"{delta:+.1f}{delta_suffix}" if delta is not None else None,
+        f"{delta:+.1f}{delta_suffix} vs previous month" if delta is not None else None,
         delta_color="inverse" if metric in {"unemployment_rate", "unemployment"} else "normal",
     )
 

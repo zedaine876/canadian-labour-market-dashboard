@@ -42,7 +42,7 @@ st.markdown(
     "Monthly labour force data for Montréal, Toronto, and Vancouver "
     "(Census Metropolitan Areas), seasonally adjusted, from Statistics Canada "
     "[Table 14-10-0460-01](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410046001). "
-    "**Note:** 'Toronto' here is the Toronto CMA, StatCan's standard geography — "
+    "**Note:** 'Toronto' here is the Toronto CMA, StatCan's standard geography, "
     "not the City of Toronto or the broader GTA boundary."
 )
 
@@ -86,7 +86,6 @@ latest_date = filtered["date"].max()
 sorted_dates = sorted(filtered["date"].unique())
 prior_date = sorted_dates[-2] if len(sorted_dates) > 1 else None
 
-st.subheader("Latest snapshot")
 st.caption(f"As of {latest_date.strftime('%B %Y')}")
 cols = st.columns(len(cities))
 for col, city in zip(cols, sorted(cities)):
@@ -130,6 +129,7 @@ st.caption(f"As of {latest_date.strftime('%B %Y')}")
 latest = filtered[filtered["date"] == latest_date].sort_values("City")
 bar_fig = px.bar(
     latest,
+    x="City",
     y=metric,
     color="City",
     color_discrete_map=CITY_COLORS,
@@ -141,6 +141,7 @@ bar_fig.update_layout(
     font_color="#FAFAFA",
     showlegend=False,
 )
+bar_fig.update_xaxes(title=None)
 st.plotly_chart(bar_fig, width="stretch")
 
 

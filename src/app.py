@@ -1,4 +1,5 @@
 import pandas as pd
+import plotly.express as px
 import streamlit as st
 from pathlib import Path
 
@@ -14,7 +15,19 @@ METRIC_LABELS = {
     "labour_force": "Labour force (thousands of persons)",
 }
 
-st.set_page_config(page_title="Canadian Labour Market Dashboard", layout="wide")
+# Rate metrics are already in percentage points; count metrics are thousands of persons.
+RATE_METRICS = {"unemployment_rate", "employment_rate", "participation_rate"}
+
+#Custom city colours (readability)
+CITY_COLORS = {
+    "Montreal": "#636EFA",
+    "Toronto": "#EF553B",
+    "Vancouver": "#00CC96",
+}
+
+st.set_page_config(
+    page_title="Canadian Labour Market Dashboard", page_icon="🍁", layout="wide"
+)
 
 
 @st.cache_data
@@ -64,18 +77,77 @@ if filtered.empty or not cities:
     st.warning("No data for the current filter selection. Pick at least one city.")
     st.stop()
 
+#Implementing a set of quick view KPI cards at the top
+is_rate = metric in RATE_METRICS
+value_suffix = "%" if is_rate else "K"
+delta_suffix = " pp" if is_rate else "K"
+
+latest_date = filtered["date"].max()
+sorted_dates = sorted(filtered["date"].unique())
+prior_date = sorted_dates[-2] if len(sorted_dates) > 1 else None
+
+st.subheader("Latest snapshot")
+st.caption(f"As of {latest_date.strftime('%B %Y')}")
+cols = st.columns(len(cities))
+for col, city in zip(cols, sorted(cities)):
+    city_df = filtered[filtered["City"] == city]
+    latest_row = city_df[city_df["date"] == latest_date]
+    if latest_row.empty:
+        continue
+    latest_value = latest_row[metric].iloc[0]
+    delta = None
+    if prior_date is not None:
+        prior_row = city_df[city_df["date"] == prior_date]
+        if not prior_row.empty:
+            delta = latest_value - prior_row[metric].iloc[0]
+    col.metric(
+        city,
+        f"{latest_value:,.1f}{value_suffix}",
+        f"{delta:+.1f}{delta_suffix}" if delta is not None else None,
+        delta_color="inverse" if metric in {"unemployment_rate", "unemployment"} else "normal",
+    )
+
 st.subheader(f"{METRIC_LABELS[metric]}")
-chart_data = filtered.pivot(index="date", columns="City", values=metric)
-st.line_chart(chart_data)
+line_fig = px.line(
+    filtered.sort_values("date"),
+    x="date",
+    y=metric,
+    color="City",
+    color_discrete_map=CITY_COLORS,
+    labels={"date": "", metric: METRIC_LABELS[metric]},
+)
+line_fig.update_layout(
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    font_color="#FAFAFA",
+    legend_title_text="",
+    hovermode="x unified",
+)
+st.plotly_chart(line_fig, use_container_width=True)
 
 st.subheader(f"{METRIC_LABELS[metric]} — most recent month in range")
-latest_date = filtered["date"].max()
-latest = filtered[filtered["date"] == latest_date].set_index("City")[metric]
 st.caption(f"As of {latest_date.strftime('%B %Y')}")
-st.bar_chart(latest)
+latest = filtered[filtered["date"] == latest_date].sort_values("City")
+bar_fig = px.bar(
+    latest,
+    x="Citt",
+    y=metric,
+    color="City",
+    color_discrete_map=CITY_COLORS,
+    labels={metric: METRIC_LABELS[metric]},
+)
+bar_fig.update_layout(
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    font_color="#FAFAFA",
+    showlegend=False,
+)
+st.plotly_chart(bar_fig, use_container_width=True)
 
-with st.expander("View underlying data"):
-    st.dataframe(
-        filtered[["date", "City", metric]].sort_values(["City", "date"]),
-        use_container_width=True,
-    )
+
+# 
+# with st.expander("View underlying data"):
+    # st.dataframe(
+        # filtered[["date", "City", metric]].sort_values(["City", "date"]),
+        # use_container_width=True,
+    # )

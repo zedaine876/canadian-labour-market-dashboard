@@ -2,7 +2,7 @@
 
 An interactive Streamlit dashboard tracking monthly labour force data for Montréal, Toronto, and Vancouver, built on Statistics Canada's official labour force survey.
 
-**[Live demo →](#)** <!-- TODO: replace with Streamlit Community Cloud URL after deploy -->
+**[Live app →](https://can-labour-dashboard.streamlit.app/)**
 
 ![Dashboard screenshot](assets/dashboard.png)
 
@@ -40,7 +40,8 @@ The app opens at `http://localhost:8501`.
 ## Stack
 
 - **pandas** — data cleaning and reshaping
-- **Streamlit** — dashboard UI and charting
+- **Streamlit** — dashboard UI and layout
+- **Plotly** — interactive charting
 
 ## Project structure
 

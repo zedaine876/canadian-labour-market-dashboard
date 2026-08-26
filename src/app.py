@@ -123,14 +123,14 @@ line_fig.update_layout(
     legend_title_text="",
     hovermode="x unified",
 )
-st.plotly_chart(line_fig, use_container_width=True)
+st.plotly_chart(line_fig, width="stretch")
 
 st.subheader(f"{METRIC_LABELS[metric]} — most recent month in range")
 st.caption(f"As of {latest_date.strftime('%B %Y')}")
 latest = filtered[filtered["date"] == latest_date].sort_values("City")
 bar_fig = px.bar(
     latest,
-    x="Citt",
+    x="City",
     y=metric,
     color="City",
     color_discrete_map=CITY_COLORS,
@@ -142,12 +142,12 @@ bar_fig.update_layout(
     font_color="#FAFAFA",
     showlegend=False,
 )
-st.plotly_chart(bar_fig, use_container_width=True)
+st.plotly_chart(bar_fig, width="stretch")
 
 
 # 
 # with st.expander("View underlying data"):
     # st.dataframe(
         # filtered[["date", "City", metric]].sort_values(["City", "date"]),
-        # use_container_width=True,
+        # width="stretch",
     # )
